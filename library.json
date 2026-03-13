@@ -1,0 +1,24 @@
+{
+  "name": "WireGuard-ESP32",
+  "version": "0.2.0",
+  "description": "WireGuard implementation for ESP32 Arduino (patched for IDF >= 4.1 / esp_netif)",
+  "keywords": ["wireguard", "vpn", "esp32", "wifi"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FelipeDadison/WireGuard-ESP32-Arduino.git"
+  },
+  "authors": [
+    {
+      "name": "Kenta Ida",
+      "email": "fuga@fugafuga.org"
+    },
+    {
+      "name": "Felipe Dadison",
+      "maintainer": true
+    }
+  ],
+  "license": "BSD-3-Clause",
+  "frameworks": "arduino",
+  "platforms": "espressif32",
+  "headers": "WireGuard-ESP32.h"
+}
