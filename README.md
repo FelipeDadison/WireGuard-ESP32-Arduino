@@ -1,3 +1,11 @@
+## Fork Notes
+
+This is a patched fork of [ciniml/WireGuard-ESP32-Arduino](https://github.com/ciniml/WireGuard-ESP32-Arduino) with the following fixes:
+
+- **IDF >= 4.1 compatibility**: replaced deprecated `tcpip_adapter` with `esp_netif` using compile-time version detection (`WIREGUARD_USE_ESP_NETIF`)
+- **Missing declaration**: added `handshake_destroy()` forward declaration to `wireguard.h`
+- **Compiler warning fix**: corrected `a24` type in `x25519.c` to silence `-Wstringop-overread` on GCC 12+
+
 # WireGuard Implementation for ESP32 Arduino
 
 This is an implementation of the [WireGuard&reg;](https://www.wireguard.com/) for ESP32 Arduino.
