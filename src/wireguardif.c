@@ -48,7 +48,22 @@
 #include "wireguard.h"
 #include "crypto.h"
 #include "esp_log.h"
-#include "tcpip_adapter.h"
+
+/* IDF >= 4.1 removed tcpip_adapter in favour of esp_netif.
+ * Detect which API to use at compile-time based on esp_idf_version.h
+ * (available from IDF 4.0). IDF < 4.0 falls through to tcpip_adapter. */
+#if __has_include("esp_idf_version.h")
+#  include "esp_idf_version.h"
+#  if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 1, 0)
+#    define WIREGUARD_USE_ESP_NETIF
+#  endif
+#endif
+
+#ifdef WIREGUARD_USE_ESP_NETIF
+#  include "esp_netif.h"
+#else
+#  include "tcpip_adapter.h"
+#endif
 
 #include "esp32-hal-log.h"
 
@@ -920,8 +935,23 @@ err_t wireguardif_init(struct netif *netif) {
 	uint8_t private_key[WIREGUARD_PRIVATE_KEY_LEN];
 	size_t private_key_len = sizeof(private_key);
 
-	struct netif* underlying_netif;
-	tcpip_adapter_get_netif(TCPIP_ADAPTER_IF_STA, &underlying_netif);
+#ifdef WIREGUARD_USE_ESP_NETIF
+	struct netif *underlying_netif = NULL;
+	{
+		char lwip_netif_name[8] = {0};
+		esp_netif_t *esp_sta = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+		if (esp_sta) {
+			esp_netif_get_netif_impl_name(esp_sta, lwip_netif_name);
+			underlying_netif = netif_find(lwip_netif_name);
+		}
+		if (underlying_netif == NULL) {
+			log_e(TAG "failed to find underlying netif (WIFI_STA_DEF)");
+		}
+	}
+#else
+	struct netif *underlying_netif = NULL;
+	tcpip_adapter_get_netif(TCPIP_ADAPTER_IF_STA, (void **)&underlying_netif);
+#endif
 	log_i(TAG "underlying_netif = %p", underlying_netif);
 
 	LWIP_ASSERT("netif != NULL", (netif != NULL));
